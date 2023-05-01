@@ -6,11 +6,13 @@
 #include <linux/types.h>
 
 
-/* Buffer for data */
-static char buffer[255];
-static int buffer_pointer = 0;
+#define BUFF_SIZE (PAGE_SIZE << 2)
 
-/* Variables for device and device class */
+/* data to append to file */
+static char msg[BUFF_SIZE];
+static size_t buf_index = 0;
+
+/* Variables for device and device class to create file inside /dev */
 static dev_t dev_nr;
 static struct class *my_class;
 static struct cdev my_device;
@@ -21,19 +23,8 @@ static struct cdev my_device;
 /**
  * @brief Read data out of the buffer
  */
-static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, loff_t *offs) {
-        int to_copy, not_copied, delta;
-
-        /* Get amount of data to copy */
-        to_copy = min(count, buffer_pointer);
-
-        /* Copy data to user */
-        not_copied = copy_to_user(user_buffer, buffer, to_copy);
-
-        /* Calculate data */
-        delta = to_copy - not_copied;
-
-        return delta;
+static ssize_t driver_read(struct file *file, char __user *user_buffer, size_t size, loff_t *offset) {
+	return simple_read_from_buffer(user_buffer, size, offset, msg, buf_index);
 }
 
 /**
@@ -75,6 +66,6 @@ static struct file_operations fops = {
         .owner = THIS_MODULE,
         .open = driver_open,
         .release = driver_close,
-        .read = driver_read,
-        .write = driver_write
+        .read = driver_read
+	//.write = driver_write
 };
