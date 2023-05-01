@@ -4,13 +4,18 @@
 #include <linux/cdev.h>
 #include <linux/uaccess.h>
 #include <linux/types.h>
-
+#include <linux/keyboard.h>
+#include <linux/kernel.h>
+#include <linux/slab.h>
+#include <linux/input.h>
+#include "keys.h"
 
 #define BUFF_SIZE (PAGE_SIZE << 2)
 
 /* data to append to file */
 static char msg[BUFF_SIZE];
 static size_t buf_index = 0;
+static int len = 0;
 
 /* Variables for device and device class to create file inside /dev */
 static dev_t dev_nr;
@@ -30,21 +35,23 @@ static ssize_t driver_read(struct file *file, char __user *user_buffer, size_t s
 /**
  * @brief Write data to buffer
  */
+
+/*
 static ssize_t driver_write(struct file *File, const char *user_buffer, size_t count, loff_t *offs) {
         int to_copy, not_copied, delta;
 
-        /* Get amount of data to copy */
+        
         to_copy = min(count, sizeof(buffer));
 
-        /* Copy data to user */
         not_copied = copy_from_user(buffer, user_buffer, to_copy);
         buffer_pointer = to_copy;
 
-        /* Calculate data */
         delta = to_copy - not_copied;
 
         return delta;
 }
+
+*/
 
 /**
  * @brief This function is called, when the device file is opened
