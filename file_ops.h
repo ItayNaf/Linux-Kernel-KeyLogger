@@ -41,7 +41,7 @@ static ssize_t driver_write(struct file *file, const char __user *user_buffer, s
 		return -EINVAL;
 	memset(msg, 0, len);
 	bytes_written = copy_from_user(msg, user_buffer, size);
-	printk(KERN_ALERT "Message Recived from user: %s", msg);
+	//printk(KERN_ALERT "Message Recived from user: %s", msg);
 	return size;
 }
 
@@ -50,7 +50,7 @@ static ssize_t driver_write(struct file *file, const char __user *user_buffer, s
  * @brief This function is called, when the device file is opened
  */
 static int driver_open(struct inode *device_file, struct file *instance) {
-        printk("dev_nr - open was called!\n");
+        //printk("dev num - open was called!\n");
         return 0;
 }
 
@@ -58,7 +58,7 @@ static int driver_open(struct inode *device_file, struct file *instance) {
  * @brief This function is called, when the device file is opened
  */
 static int driver_close(struct inode *device_file, struct file *instance) {
-        printk("dev_nr - close was called!\n");
+        //printk("dev num - close was called!\n");
         return 0;
 }
 
