@@ -18,4 +18,5 @@ $ cat /dev/kkeylogger # The device file where keystrokes are appended to.
 ```
 
 **Note** it was only tested on my Virtual Machine: `Linux 5.19.0-40-generic #41~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC 2 x86_64 x86_64 x86_64 GNU/Linux` so use it at your own risk.
+
 **Note** this is still an unfinished project, I intend to make more stealthier by hiding the file from the file system to a certin extent and maybe even tansfering the keystroke data to a host machine and then the program will serve as a some kind of RootKit.
