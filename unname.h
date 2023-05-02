@@ -35,23 +35,16 @@ static ssize_t driver_read(struct file *file, char __user *user_buffer, size_t s
 /**
  * @brief Write data to buffer
  */
-
-/*
-static ssize_t driver_write(struct file *File, const char *user_buffer, size_t count, loff_t *offs) {
-        int to_copy, not_copied, delta;
-
-        
-        to_copy = min(count, sizeof(buffer));
-
-        not_copied = copy_from_user(buffer, user_buffer, to_copy);
-        buffer_pointer = to_copy;
-
-        delta = to_copy - not_copied;
-
-        return delta;
+static ssize_t driver_write(struct file *file, const char __user *user_buffer, size_t size, loff_t * offset) {
+        int bytes_written = 0;
+	if(size > len)
+		return -EINVAL;
+	memset(msg, 0, len);
+	bytes_written = copy_from_user(msg, user_buffer, size);
+	printk(KERN_ALERT "Message Recived from user: %s", msg);
+	return size;
 }
 
-*/
 
 /**
  * @brief This function is called, when the device file is opened
@@ -73,6 +66,6 @@ static struct file_operations fops = {
         .owner = THIS_MODULE,
         .open = driver_open,
         .release = driver_close,
-        .read = driver_read
-	//.write = driver_write
+        .read = driver_read,
+	.write = driver_write
 };

